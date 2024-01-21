@@ -1,0 +1,84 @@
+<?php
+
+namespace app\core;
+
+abstract class Model
+{
+    public const RULE_REQUIRED = 'required';
+    public const RULE_MINLENGTH = 'min';
+    public const RULE_MAXLENGTH = 'max';
+    public const RULE_EMAIL = 'email';
+    public const RULE_MATCHES = 'matches';
+    // public const RULE_IS_UNIQUE = 'is_unique';
+    // public const RULE_IS_IN_DB = 'is_in_db';
+    public array $errors = [];
+
+    abstract public function rules(): array;
+
+    public function loadData($data)
+    {
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key)) {
+
+                $this->$key = $value;
+            }
+        }
+    }
+    public function validate()
+    {
+        foreach ($this->rules() as $attribute => $value) {
+            $rules = $value['rules'];
+            $value = $this->$attribute;
+            foreach ($rules as $rule) {
+                $ruleName = $rule;
+                if (is_array($rule)) {
+                    $ruleName = $rule[0];
+                }
+                if ($ruleName == self::RULE_REQUIRED && empty($value)) {
+                    $this->addError($attribute, self::RULE_REQUIRED);
+                }
+                if ($ruleName == self::RULE_EMAIL && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $this->addError($attribute, self::RULE_EMAIL);
+                }
+                if ($ruleName == self::RULE_MINLENGTH && strlen($value) < $rule['min']) {
+                    $this->addError($attribute, self::RULE_MINLENGTH, $rule);
+                }
+                if ($ruleName == self::RULE_MAXLENGTH && strlen($value) > $rule['max']) {
+                    $this->addError($attribute, self::RULE_MAXLENGTH, $rule);
+                }
+
+                if ($ruleName == self::RULE_MATCHES && $value != $this->{$rule['match']}) {
+                    $this->addError($attribute, self::RULE_MATCHES, $rule);
+                }
+            }
+        }
+        return $this->errors ? false : true;
+    }
+
+    public function addError(string $attribute, string $rule, array $params = [])
+    {
+        $message = $this->errorMessages()[$rule];
+        foreach ($params as $key => $value) {
+            $message = str_replace("{{$key}}", $value, $message);
+        }
+        $this->errors[$attribute][] = $message;
+    }
+
+    public function errorMessages()
+    {
+        return [
+            self::RULE_REQUIRED => 'This field is required',
+            self::RULE_MINLENGTH => 'This field must have at least {min} characters',
+            self::RULE_MAXLENGTH => 'This field must have at most {max} characters',
+            self::RULE_EMAIL => 'This field must be a valid email',
+            self::RULE_MATCHES => 'This field must match {match} field',
+
+        ];
+    }
+    public function hasError($attribute){
+        return $this->errors[$attribute] ?? false;
+    }
+    public function getFirstError($attribute){
+        return $this->errors[$attribute][0] ?? false;
+    }
+}

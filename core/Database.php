@@ -68,4 +68,8 @@ class Database
     protected function log($message){
         echo '['. date('Y-m-d H:i:s') . ']' . $message. "\n";
     }
+    public function prepare($sql)
+    {
+        return $this->pdo->prepare($sql);
+    }
 }

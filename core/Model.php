@@ -9,7 +9,7 @@ abstract class Model
     public const RULE_MAXLENGTH = 'max';
     public const RULE_EMAIL = 'email';
     public const RULE_MATCHES = 'matches';
-    // public const RULE_IS_UNIQUE = 'is_unique';
+    public const RULE_IS_UNIQUE = 'is_unique';
     // public const RULE_IS_IN_DB = 'is_in_db';
     public array $errors = [];
 
@@ -50,6 +50,17 @@ abstract class Model
                 if ($ruleName == self::RULE_MATCHES && $value != $this->{$rule['match']}) {
                     $this->addError($attribute, self::RULE_MATCHES, $rule);
                 }
+                if ($ruleName == self::RULE_IS_UNIQUE) {
+                    $class = $rule['class'];
+                    $uniqueAttribiute = $rule['attribute'] ?? $attribute;
+                    $tableName = $class::tableName();
+                    $statement = Application::$APP->db->prepare("SELECT * FROM $tableName WHERE $uniqueAttribiute = :attr");
+                    $statement->bindValue(':attr', $value);
+                    $statement->execute();
+                    if ($statement->rowCount()) {
+                        $this->addError($attribute, self::RULE_IS_UNIQUE, ['field' => $attribute]);
+                    }
+                }
             }
         }
         return $this->errors ? false : true;
@@ -72,13 +83,15 @@ abstract class Model
             self::RULE_MAXLENGTH => 'This field must have at most {max} characters',
             self::RULE_EMAIL => 'This field must be a valid email',
             self::RULE_MATCHES => 'This field must match {match} field',
-
+            self::RULE_IS_UNIQUE => 'Record with this {field} already exists',
         ];
     }
-    public function hasError($attribute){
+    public function hasError($attribute)
+    {
         return $this->errors[$attribute] ?? false;
     }
-    public function getFirstError($attribute){
+    public function getFirstError($attribute)
+    {
         return $this->errors[$attribute][0] ?? false;
     }
 }

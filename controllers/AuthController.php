@@ -5,35 +5,28 @@ namespace app\controllers;
 use app\core\Application;
 use app\core\Controller;
 use app\core\Request;
+use app\core\Response;
+use app\models\LoginForm;
 use app\models\User;
 
 class AuthController extends Controller
 {
-    public function login()
+    public function login(Request $request,Response $response)
     {
         $this->setLayout('auth');
-        return $this->render('login');
+        $loginFrom = new LoginForm();
+        if ($request->isPost()) {
+            $loginFrom->loadData($request->getBody());
+            if ($loginFrom->validate() && $loginFrom->login()) {
+                Application::$APP->session->setFlash('success', 'Welcome back');
+                $response->redirect('/');
+                return;
+            }
+            return $this->render('login', ['model' => $loginFrom]);
+        }
+        return $this->render('login',['model' => new LoginForm()]);
     }
-    // public function handleLogin(Request $request)
-    // {
-    //     $body = $request->getBody();
-    //     $email = $body['email'];
-    //     $password = $body['password'];
-    //     $user = User::where('email', $email)->first();
-    //     if ($user) {
-    //         if (password_verify($password, $user->password)) {
-    //             $_SESSION['user'] = $user;
-    //             return $this->redirect('/dashboard');
-    //         }
-    //     }
-    //     return $this->redirect('/login');
-    // }
-    // public function logout()
-    // {
-    //     unset($_SESSION['user']);
-    //     return $this->redirect('/login');
-    // }
-    public function register(Request $request)
+    public function register(Request $request,Response $response)
     {
         $this->setLayout('auth');
         if ($request->isPost()) {
@@ -41,10 +34,15 @@ class AuthController extends Controller
             $user->loadData($request->getBody());
             if ($user->validate() && $user->save()) {
                 Application::$APP->session->setFlash('success', 'Thanks for registering');
-                Application::$APP->response->redirect('/');
+                $response->redirect('/');
+                return;
             }
             return $this->render('register', ['model' => $user]);
         }
         return $this->render('register', ['model' => new User()]);
+    }
+    public function logout(Request $request,Response $response){
+        Application::$APP->logout();
+        $response->redirect('/');
     }
 }

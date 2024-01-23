@@ -15,8 +15,8 @@ class Form
     {
         echo '</form>';
     }
-    public function field(Model $model,$attribute,$type,$frontEndName){
-        return new Field($model,$attribute,$type,$frontEndName);
+    public function field(Model $model,$attribute,$type){
+        return new Field($model,$attribute,$type);
 
     }
 }

@@ -44,11 +44,17 @@ use app\core\Application;
                         <a class="nav-link disabled" aria-disabled="true">Disabled</a>
                     </li>
                 </ul>
+                <?php if(Application::isGuest()): ?>
                 <ul class="navbar-nav d-flex">
                     <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
                     <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
                 </ul>
-
+                <?php else:?>
+                    <ul class="navbar-nav d-flex">
+                        <li class="nav-item"><?= Application::$APP->user->getDisplayName(); ?></li>
+                        <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+                    </ul>
+                <?php endif;?>
             </div>
         </div>
     </nav>

@@ -12,7 +12,9 @@ abstract class Model
     public const RULE_IS_UNIQUE = 'is_unique';
     // public const RULE_IS_IN_DB = 'is_in_db';
     public array $errors = [];
-
+    public function attributeLabels(): array{
+        return[];
+    }
     abstract public function rules(): array;
 
     public function loadData($data)
@@ -35,20 +37,20 @@ abstract class Model
                     $ruleName = $rule[0];
                 }
                 if ($ruleName == self::RULE_REQUIRED && empty($value)) {
-                    $this->addError($attribute, self::RULE_REQUIRED);
+                    $this->addErrorForRule($attribute, self::RULE_REQUIRED);
                 }
                 if ($ruleName == self::RULE_EMAIL && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                    $this->addError($attribute, self::RULE_EMAIL);
+                    $this->addErrorForRule($attribute, self::RULE_EMAIL);
                 }
                 if ($ruleName == self::RULE_MINLENGTH && strlen($value) < $rule['min']) {
-                    $this->addError($attribute, self::RULE_MINLENGTH, $rule);
+                    $this->addErrorForRule($attribute, self::RULE_MINLENGTH, $rule);
                 }
                 if ($ruleName == self::RULE_MAXLENGTH && strlen($value) > $rule['max']) {
-                    $this->addError($attribute, self::RULE_MAXLENGTH, $rule);
+                    $this->addErrorForRule($attribute, self::RULE_MAXLENGTH, $rule);
                 }
 
                 if ($ruleName == self::RULE_MATCHES && $value != $this->{$rule['match']}) {
-                    $this->addError($attribute, self::RULE_MATCHES, $rule);
+                    $this->addErrorForRule($attribute, self::RULE_MATCHES, ['match' => $this->attributeLabels()[$attribute]]);
                 }
                 if ($ruleName == self::RULE_IS_UNIQUE) {
                     $class = $rule['class'];
@@ -58,7 +60,7 @@ abstract class Model
                     $statement->bindValue(':attr', $value);
                     $statement->execute();
                     if ($statement->rowCount()) {
-                        $this->addError($attribute, self::RULE_IS_UNIQUE, ['field' => $attribute]);
+                        $this->addErrorForRule($attribute, self::RULE_IS_UNIQUE, ['field' =>  $this->attributeLabels()[$attribute]]);
                     }
                 }
             }
@@ -66,12 +68,17 @@ abstract class Model
         return $this->errors ? false : true;
     }
 
-    public function addError(string $attribute, string $rule, array $params = [])
+    private function addErrorForRule(string $attribute, string $rule, array $params = [])
     {
+        var_dump($params);
         $message = $this->errorMessages()[$rule];
         foreach ($params as $key => $value) {
             $message = str_replace("{{$key}}", $value, $message);
         }
+        $this->errors[$attribute][] = $message;
+    }
+    public function addError(string $attribute, string $message)
+    {
         $this->errors[$attribute][] = $message;
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace app\core;
+use app\core\exception\NotFoundException;
 
 /**
  * @package app\Application;
@@ -43,22 +44,27 @@ class Router
         $method = $this->request->method();
         $callback = $this->routes[$method][$path] ?? false;
         if ($callback === false) {
-            $this->response->setStatusCode(404);
-            return $this->renderView('_404');
+            throw new NotFoundException();
         }
         if (is_string($callback)) {
             return $this->renderView($callback);
         }
-        if(is_array($callback)){
-            Application::$APP->controller = new $callback[0];
-            $callback[0] = Application::$APP->controller;
+        if (is_array($callback)) {
+            $controller = new $callback[0]();
+            Application::$APP->controller = $controller;
+            $controller->action = $callback[1];
+            foreach ($controller->getMiddlewares()as $middleware){
+                $middleware->execute();
+            }
+            $callback[0] = $controller;
+
         }
-        return call_user_func($callback,$this->request,$this->response);
+        return call_user_func($callback, $this->request, $this->response);
     }
-    public function renderView($view, array $params=[])
+    public function renderView($view, array $params = [])
     {
         $layoutContent = $this->layoutContent();
-        $view = $this->renderOnlyView($view,$params);
+        $view = $this->renderOnlyView($view, $params);
         return str_replace('{{content}}', $view, $layoutContent);
     }
     /**
@@ -69,12 +75,12 @@ class Router
      */
     protected function layoutContent()
     {
-        $layout= Application::$APP->controller->layout;
+        $layout = Application::$APP->controller->layout;
         ob_start();
         include_once Application::$ROOT_DIR . "/views/layouts/{$layout}.php";
         return ob_get_clean();
     }
-    protected function renderOnlyView($view, array $params=[])
+    protected function renderOnlyView($view, array $params = [])
     {
         foreach ($params as $key => $value) {
             ${$key} = $value;

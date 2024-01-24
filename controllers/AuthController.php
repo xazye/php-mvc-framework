@@ -8,10 +8,13 @@ use app\core\Request;
 use app\core\Response;
 use app\models\LoginForm;
 use app\models\User;
-
+use app\core\middlewares\AuthMiddleware;
 class AuthController extends Controller
 {
-    public function login(Request $request,Response $response)
+    public function __construct(){
+        $this->registerMiddleware(new AuthMiddleware(['profile']));
+    }
+    public function login(Request $request, Response $response)
     {
         $this->setLayout('auth');
         $loginFrom = new LoginForm();
@@ -24,9 +27,9 @@ class AuthController extends Controller
             }
             return $this->render('login', ['model' => $loginFrom]);
         }
-        return $this->render('login',['model' => new LoginForm()]);
+        return $this->render('login', ['model' => new LoginForm()]);
     }
-    public function register(Request $request,Response $response)
+    public function register(Request $request, Response $response)
     {
         $this->setLayout('auth');
         if ($request->isPost()) {
@@ -41,8 +44,13 @@ class AuthController extends Controller
         }
         return $this->render('register', ['model' => new User()]);
     }
-    public function logout(Request $request,Response $response){
+    public function logout(Request $request, Response $response)
+    {
         Application::$APP->logout();
         $response->redirect('/');
+    }
+    public function profile()
+    {
+        return $this->render('profile');
     }
 }

@@ -25,7 +25,7 @@ $app = new Application(dirname(__DIR__), $config);
 $app->router->get('/', [SiteController::class, 'home']);
 $app->router->get('/contact', [SiteController::class, 'contact']);
 //I think to solve this problem , when you used call_user_fun without made object from the class, you could use only static function but when you used object from this class you could use pure functions
-$app->router->post('/contact', [SiteController::class, 'handleContact']);
+$app->router->post('/contact', [SiteController::class, 'contact']);
 $app->router->get('/login', [AuthController::class, 'login']);
 $app->router->post('/login', [AuthController::class, 'login']);
 $app->router->get('/register', [AuthController::class, 'register']);

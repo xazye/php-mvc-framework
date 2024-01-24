@@ -1,16 +1,26 @@
-<form method="POST" action="">
-  <div class="mb-3">
-    <label for="email" class="form-label">Email address</label>
-    <input type="text" class="form-control" name="email" id="email" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-  </div>
-  <div class="mb-3">
-    <label for="pass" class="form-label">Password</label>
-    <input type="password" class="form-control" name="pass" id="pass">
-  </div>
-  <div class="mb-3 form-check">
-    <input type="checkbox" class="form-check-input" id="exampleCheck1">
-    <label class="form-check-label" name="check-label"for="exampleCheck1">Check me out</label>
-  </div>
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+<?php
+/**
+ * @var $model \app\models\User
+ */
+
+/**
+ * @var \app\core\View $this 
+ */
+$this->title = "Contact Us";
+
+use app\core\form\InputField;
+use app\core\form\Form;
+use app\core\form\TextAreaField;
+
+?>
+
+<h1>Contact us</h1>
+
+<?php $form = Form::begin('', "post");
+echo $form->field($model, 'email', InputField::TYPE_EMAIL);
+echo $form->field($model, 'subject', InputField::TYPE_TEXT);
+echo $form->field($model, 'body', TextAreaField::TYPE_TEXTAREA);
+echo $form->field($model, 'checkbox', InputField::TYPE_CHECKBOX);
+?>
+<button type="submit" class="btn btn-primary">Submit</button>
+<?php Form::end() ?>

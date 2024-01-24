@@ -16,7 +16,11 @@ class Form
         echo '</form>';
     }
     public function field(Model $model,$attribute,$type){
-        return new Field($model,$attribute,$type);
+        if ($type === TextAreaField::TYPE_TEXTAREA){
+            return new TextAreaField($model,$attribute);
+
+        }
+        return new InputField($model,$attribute,$type);
 
     }
 }

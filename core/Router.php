@@ -3,6 +3,7 @@
 namespace app\core;
 use app\core\exception\NotFoundException;
 
+
 /**
  * @package app\Application;
  */
@@ -35,7 +36,7 @@ class Router
      * The resolve function checks if a route exists and returns the corresponding callback or renders
      * a view if the callback is a string.
      * 
-     * @return either a string "Not found" if the callback is false, or the result of calling the
+     * @return mixed "Not found" if the callback is false, or the result of calling the
      * callback function.
      */
     public function resolve()
@@ -47,7 +48,7 @@ class Router
             throw new NotFoundException();
         }
         if (is_string($callback)) {
-            return $this->renderView($callback);
+            return Application::$APP->view->renderView($callback);
         }
         if (is_array($callback)) {
             $controller = new $callback[0]();
@@ -60,33 +61,5 @@ class Router
 
         }
         return call_user_func($callback, $this->request, $this->response);
-    }
-    public function renderView($view, array $params = [])
-    {
-        $layoutContent = $this->layoutContent();
-        $view = $this->renderOnlyView($view, $params);
-        return str_replace('{{content}}', $view, $layoutContent);
-    }
-    /**
-     * The function "layoutContent" includes the main layout file and returns its content.
-     * 
-     * @return string HTML output of the included file "main.php" after buffering it using the ob_start() and
-     * ob_get_clean() functions.
-     */
-    protected function layoutContent()
-    {
-        $layout = Application::$APP->controller->layout;
-        ob_start();
-        include_once Application::$ROOT_DIR . "/views/layouts/{$layout}.php";
-        return ob_get_clean();
-    }
-    protected function renderOnlyView($view, array $params = [])
-    {
-        foreach ($params as $key => $value) {
-            ${$key} = $value;
-        }
-        ob_start();
-        include_once Application::$ROOT_DIR . "/views/{$view}.php";
-        return ob_get_clean();
     }
 }

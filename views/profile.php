@@ -1,3 +1,10 @@
+<?php 
+
+/**
+ * @var \app\core\View $this 
+ */
+$this->title = "Profile";
+?>
 <h1>Profile page</h1>
 <form method="POST" action="">
   <div class="mb-3">

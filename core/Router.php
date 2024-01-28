@@ -2,6 +2,7 @@
 
 namespace app\core;
 use app\core\exception\NotFoundException;
+use Symfony\Component\HttpFoundation\Request as Requestsymfony;
 
 
 /**
@@ -16,21 +17,21 @@ class Router
  */
 {
     protected array $routes = [];
-    public Request $request;
+    public Requestsymfony $request;
     public Response $response;
 
-    public function __construct(Request $request, Response $response)
+    public function __construct(Requestsymfony $request, Response $response)
     {
-        $this->request = $request;
+        $this->request = $request::createFromGlobals();
         $this->response = $response;
     }
     public function get($path, $callback)
     {
-        $this->routes['get'][$path] = $callback;
+        $this->routes['GET'][$path] = $callback;
     }
     public function post($path, $callback)
     {
-        $this->routes['post'][$path] = $callback;
+        $this->routes['POST'][$path] = $callback;
     }
     /**
      * The resolve function checks if a route exists and returns the corresponding callback or renders
@@ -41,8 +42,8 @@ class Router
      */
     public function resolve()
     {
-        $path = $this->request->getPath();
-        $method = $this->request->method();
+        $path = $this->request->getPathInfo();;
+        $method = $this->request->server->get('REQUEST_METHOD');
         $callback = $this->routes[$method][$path] ?? false;
         if ($callback === false) {
             throw new NotFoundException();

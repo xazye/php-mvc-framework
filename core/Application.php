@@ -4,13 +4,14 @@ namespace app\core;
 
 use app\core\db\Database;
 use app\core\db\DbModel;
+use Symfony\Component\HttpFoundation\Request as Requestsymfony;
 /**
  * @package app\Application;
  */
 class Application
 {
     public Router $router;
-    public Request $request;
+    public Requestsymfony $request;
     public Response $response;
     public Database $db;
     public static string $ROOT_DIR;
@@ -25,7 +26,7 @@ class Application
         $this->userClass = $config['userClass'];
         self::$APP = $this;
         self::$ROOT_DIR = $rootPath;
-        $this->request = new Request();
+        $this->request = new Requestsymfony();
         $this->response = new Response();
         $this->controller = new Controller();
         $this->db = new Database($config['db']);

@@ -4,8 +4,8 @@ namespace app\controllers;
 
 use app\core\Application;
 use app\core\Controller;
-use app\core\Request;
 use app\core\Response;
+use Symfony\Component\HttpFoundation\Request as Requestsymfony;
 use app\models\ContactForm;
 
 class SiteController extends Controller
@@ -18,11 +18,11 @@ class SiteController extends Controller
         return $this->render('home', $params);
     }
 
-    public function contact(Request $request, Response $response)
+    public function contact(Requestsymfony $request, Response $response)
     {
         $contact =  new ContactForm();
-        if($request->isPost()){
-            $contact->loadData($request->getBody());
+        if($request->isMethod('post')){
+            $contact->loadData($request->request->all());
             // add contact->send
             if($contact->validate()){
                 Application::$APP->session->setFlash('success','Thanks for contacting us.');

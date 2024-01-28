@@ -13,6 +13,8 @@ class User extends UserModel
     public string $email = '';
     public string $password = '';
     public string $password_repeat = '';
+    public string $id = '';
+    public string $created_at = '';
     public int $status = self::STATUS_INACTIVE;
     public function save()
     {

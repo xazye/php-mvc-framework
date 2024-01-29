@@ -4,6 +4,10 @@ namespace app\core;
 use app\core\exception\NotFoundException;
 use Symfony\Component\HttpFoundation\Request as Requestsymfony;
 
+use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\Routing\RequestContext;
 
 /**
  * @package app\Application;
@@ -16,22 +20,27 @@ class Router
  * It can also render views and layouts.
  */
 {
-    protected array $routes = [];
+    protected RouteCollection $routes;
     public Requestsymfony $request;
+    public RequestContext $context;
     public Response $response;
+    public UrlMatcher $matcher;
 
     public function __construct(Requestsymfony $request, Response $response)
     {
+        $this->routes = new RouteCollection();;
         $this->request = $request::createFromGlobals();
         $this->response = $response;
+        $this->context = new RequestContext();
+        $this->matcher= new UrlMatcher($this->routes,$this->context->fromRequest($this->request));
     }
-    public function get($path, $callback)
+    public function add($routename, $path, $callback)
     {
-        $this->routes['GET'][$path] = $callback;
-    }
-    public function post($path, $callback)
-    {
-        $this->routes['POST'][$path] = $callback;
+        $this->routes->add($routename, new Route($path,[
+            '_controller' => $callback[0],
+            '_action' => $callback[1]
+        ]));
+        
     }
     /**
      * The resolve function checks if a route exists and returns the corresponding callback or renders
@@ -43,8 +52,7 @@ class Router
     public function resolve()
     {
         $path = $this->request->getPathInfo();;
-        $method = $this->request->server->get('REQUEST_METHOD');
-        $callback = $this->routes[$method][$path] ?? false;
+        $callback = $this->matcher->match($path) ?? false;
         if ($callback === false) {
             throw new NotFoundException();
         }
@@ -52,15 +60,14 @@ class Router
             return Application::$APP->view->renderView($callback);
         }
         if (is_array($callback)) {
-            $controller = new $callback[0]();
+            $controller = new $callback['_controller']();
             Application::$APP->controller = $controller;
-            $controller->action = $callback[1];
+            $controller->action = $callback['_action'];
             foreach ($controller->getMiddlewares()as $middleware){
                 $middleware->execute();
             }
-            $callback[0] = $controller;
 
         }
-        return call_user_func($callback, $this->request, $this->response);
+        return call_user_func([$controller,$callback['_action']], $this->request, $this->response);
     }
 }

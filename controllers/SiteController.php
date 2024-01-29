@@ -10,7 +10,7 @@ use app\models\ContactForm;
 
 class SiteController extends Controller
 {
-    public function home()
+    public function home(Requestsymfony $request, Response $response)
     {
         $params = [
             'name' => 'worldstuff2',

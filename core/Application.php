@@ -5,6 +5,7 @@ namespace app\core;
 use app\core\db\Database;
 use app\core\db\DbModel;
 use Symfony\Component\HttpFoundation\Request as Requestsymfony;
+
 /**
  * @package app\Application;
  */
@@ -48,14 +49,9 @@ class Application
     }
     public function run()
     {
-        try{
-            echo $this->router->resolve();
-        }catch(\Exception $e){
-            $this->response->setStatusCode($e->getCode());
-            echo $this->view->renderView('_error',[
-                'exception'=> $e
-            ]);
-        }
+        $response = $this->router->resolve();
+        $response->send();
+       
     }
     public function login(UserModel $user){
         $this->user = $user;

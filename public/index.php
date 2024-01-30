@@ -1,9 +1,7 @@
 <?php
 
-use app\controllers\AuthController;
-use app\controllers\SiteController;
 use app\core\Application;
-
+use Symfony\Component\Routing\Route;
 require __DIR__ . '/../vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
@@ -21,14 +19,14 @@ $config = [
 ];
 
 $app = new Application(dirname(__DIR__), $config);
+$app->router->add('contactform', new Route('/contact',['_controller' => 'app\controllers\SiteController::contact']));
+$app->router->add('login',new Route('/login',['_controller'=>'app\controllers\AuthController::login']));
+$app->router->add('registration',new Route('/register',['_controller'=>'app\controllers\AuthController::register']));
+$app->router->add('logout',new Route('/logout',['_controller'=>'app\controllers\AuthController::logout']));
+$app->router->add('profile',new Route('/profile',['_controller'=>'app\controllers\AuthController::profile']));
 
-$app->router->add('contactform','/contact', [SiteController::class, 'contact']);
-$app->router->add('index','/login', [AuthController::class, 'login']);
-$app->router->add('registration','/register', [AuthController::class, 'register']);
-$app->router->add('logout','/logout', [AuthController::class, 'logout']);
-$app->router->add('profile','/profile', [AuthController::class, 'profile']);
 
-$app->router->add('index','/', [SiteController::class, 'home']);
+$app->router->add('index',new Route('/',['_controller' =>'app\controllers\SiteController::home', 'name'=>'Vasya']));
 
 
 $app->run();

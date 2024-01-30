@@ -21,7 +21,7 @@ class Controller
      * 
      * @return string The rendered view content.
      */
-    public function render(string $view, array $params=[])
+    public function render(string $view, $params=[])
     {
         return Application::$APP->view->renderView($view, $params);
     }

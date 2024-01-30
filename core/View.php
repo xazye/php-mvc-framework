@@ -3,7 +3,7 @@ namespace app\core;
 class View{
     public string $title='Home';
 
-    public function renderView($view, array $params = [])
+    public function renderView($view, $params )
     {
         $view = $this->renderOnlyView($view, $params);
         $layoutContent = $this->layoutContent();
@@ -22,10 +22,12 @@ class View{
         include_once Application::$ROOT_DIR . "/views/layouts/{$layout}.php";
         return ob_get_clean();
     }
-    protected function renderOnlyView($view, array $params = [])
+    protected function renderOnlyView($view, ...$params)
     {
-        foreach ($params as $key => $value) {
-            ${$key} = $value;
+        if(is_array($params[0])){
+            foreach ($params[0] as $key => $value) {
+                ${$key} = $value;
+            }
         }
         ob_start();
         include_once Application::$ROOT_DIR . "/views/{$view}.php";

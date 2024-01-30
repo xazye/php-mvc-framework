@@ -3,12 +3,13 @@
 namespace app\core;
 use app\core\exception\NotFoundException;
 use Symfony\Component\HttpFoundation\Request as Requestsymfony;
-
+use Symfony\Component\HttpFoundation\Response as Responsesymfony;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
-
+use Symfony\Component\HttpKernel\Controller\ControllerResolver;
+use  Symfony\Component\HttpKernel\Controller\ArgumentResolver;
 /**
  * @package app\Application;
  */
@@ -23,24 +24,21 @@ class Router
     protected RouteCollection $routes;
     public Requestsymfony $request;
     public RequestContext $context;
-    public Response $response;
     public UrlMatcher $matcher;
-
-    public function __construct(Requestsymfony $request, Response $response)
+    public ControllerResolver $controllerResolver;
+    public ArgumentResolver $argumentResolver;
+    public function __construct(Requestsymfony $request)
     {
         $this->routes = new RouteCollection();;
         $this->request = $request::createFromGlobals();
-        $this->response = $response;
         $this->context = new RequestContext();
         $this->matcher= new UrlMatcher($this->routes,$this->context->fromRequest($this->request));
+        $this->controllerResolver= new ControllerResolver();
+        $this->argumentResolver= new ArgumentResolver();
     }
-    public function add($routename, $path, $callback)
+    public function add($routename, Route $route)
     {
-        $this->routes->add($routename, new Route($path,[
-            '_controller' => $callback[0],
-            '_action' => $callback[1]
-        ]));
-        
+        $this->routes->add($routename,$route);
     }
     /**
      * The resolve function checks if a route exists and returns the corresponding callback or renders
@@ -49,25 +47,28 @@ class Router
      * @return mixed "Not found" if the callback is false, or the result of calling the
      * callback function.
      */
-    public function resolve()
+    public function resolve() :Responsesymfony
     {
-        $path = $this->request->getPathInfo();;
-        $callback = $this->matcher->match($path) ?? false;
-        if ($callback === false) {
-            throw new NotFoundException();
-        }
-        if (is_string($callback)) {
-            return Application::$APP->view->renderView($callback);
-        }
-        if (is_array($callback)) {
-            $controller = new $callback['_controller']();
-            Application::$APP->controller = $controller;
-            $controller->action = $callback['_action'];
-            foreach ($controller->getMiddlewares()as $middleware){
-                $middleware->execute();
-            }
+        $this->request->attributes->add($this->matcher->match($this->request->getPathInfo()));
+        $controller = $this->controllerResolver->getController($this->request);
+        // var_dump($controller);
+        $arguments = $this->argumentResolver->getArguments($this->request, $controller);
+        // var_dump($arguments);
+        return call_user_func($controller, ...$arguments);
+        // if ($callback === false) {
+        //     throw new NotFoundException();
+        // }
+        // if (is_string($callback)) {
+        //     return Application::$APP->view->renderView($callback);
+        // }
+        // if (is_array($callback)) {
+        //     $controller = new $callback['_controller']();
+        //     Application::$APP->controller = $controller;
+        //     $controller->action = $callback['_action'];
+        //     foreach ($controller->getMiddlewares()as $middleware){
+        //         $middleware->execute();
+        //     }
 
-        }
-        return call_user_func([$controller,$callback['_action']], $this->request, $this->response);
+        // }
     }
 }

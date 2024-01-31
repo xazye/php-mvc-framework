@@ -13,7 +13,6 @@ class Application
 {
     public Router $router;
     public Requestsymfony $request;
-    public Response $response;
     public Database $db;
     public static string $ROOT_DIR;
     public static Application $APP;
@@ -28,10 +27,9 @@ class Application
         self::$APP = $this;
         self::$ROOT_DIR = $rootPath;
         $this->request = new Requestsymfony();
-        $this->response = new Response();
         $this->controller = new Controller();
         $this->db = new Database($config['db']);
-        $this->router = new Router($this->request,$this->response);
+        $this->router = new Router($this->request);
         $this->session = new Session();
         $this->view = new View();
 
@@ -49,8 +47,15 @@ class Application
     }
     public function run()
     {
-        $response = $this->router->resolve();
+        try{
+            $response = $this->router->resolve();
+        }catch(\Exception $e){
+            $response = $this->view->renderView('_error',[
+                'exception'=> $e
+            ]);
+        }
         $response->send();
+
        
     }
     public function login(UserModel $user){

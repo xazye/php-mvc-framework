@@ -6,4 +6,4 @@
  * @var \app\core\View $this 
  */
 ?>
-errro
+errror

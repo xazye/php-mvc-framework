@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use  Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 /**
  * @package app\Application;
  */
@@ -49,26 +50,11 @@ class Router
      */
     public function resolve() :Responsesymfony
     {
+        // this throws exception when route not found
+        // exceptions caught in application->run();
         $this->request->attributes->add($this->matcher->match($this->request->getPathInfo()));
         $controller = $this->controllerResolver->getController($this->request);
-        // var_dump($controller);
         $arguments = $this->argumentResolver->getArguments($this->request, $controller);
-        // var_dump($arguments);
         return call_user_func($controller, ...$arguments);
-        // if ($callback === false) {
-        //     throw new NotFoundException();
-        // }
-        // if (is_string($callback)) {
-        //     return Application::$APP->view->renderView($callback);
-        // }
-        // if (is_array($callback)) {
-        //     $controller = new $callback['_controller']();
-        //     Application::$APP->controller = $controller;
-        //     $controller->action = $callback['_action'];
-        //     foreach ($controller->getMiddlewares()as $middleware){
-        //         $middleware->execute();
-        //     }
-
-        // }
     }
 }

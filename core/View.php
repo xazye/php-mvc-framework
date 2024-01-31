@@ -1,5 +1,6 @@
 <?php 
 namespace app\core;
+use Symfony\Component\HttpFoundation\Response;
 class View{
     public string $title='Home';
 

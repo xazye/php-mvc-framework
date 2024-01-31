@@ -25,7 +25,6 @@ $app->router->add('registration',new Route('/register',['_controller'=>'app\cont
 $app->router->add('logout',new Route('/logout',['_controller'=>'app\controllers\AuthController::logout']));
 $app->router->add('profile',new Route('/profile',['_controller'=>'app\controllers\AuthController::profile']));
 
-
 $app->router->add('index',new Route('/',['_controller' =>'app\controllers\SiteController::home', 'name'=>'Vasya']));
 
 

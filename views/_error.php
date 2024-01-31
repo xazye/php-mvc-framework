@@ -1,9 +1,10 @@
 <?php 
 /**
- * @var $exception \Exception
+ * @var $exception Symfony\Component\Routing\Exception
  */
 /**
  * @var \app\core\View $this 
  */
 ?>
-errror
+<h1>Uh oh!</h1>
+<?=$exception->getMessage(); ?>

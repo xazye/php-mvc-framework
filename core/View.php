@@ -4,11 +4,11 @@ use Symfony\Component\HttpFoundation\Response;
 class View{
     public string $title='Home';
 
-    public function renderView($view, $params )
+    public function renderView($view, $params ) : Response
     {
         $view = $this->renderOnlyView($view, $params);
         $layoutContent = $this->layoutContent();
-        return str_replace('{{content}}', $view, $layoutContent);
+        return new Response(str_replace('{{content}}', $view, $layoutContent));
     }
     /**
      * The function "layoutContent" includes the main layout file and returns its content.

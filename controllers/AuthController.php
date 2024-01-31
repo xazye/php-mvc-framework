@@ -26,9 +26,9 @@ class AuthController extends Controller
                 Application::$APP->session->setFlash('success', 'Welcome back');
                 return new RedirectResponse('/',301);
             }
-            return new Responsesymfony($this->render('login', ['model' => $loginFrom]));
+            return $this->render('login', ['model' => $loginFrom]);
         }
-        return new Responsesymfony($this->render('login', ['model' => new LoginForm()]));
+        return $this->render('login', ['model' => new LoginForm()]);
     }
     public function register(Requestsymfony $request)
     {
@@ -40,9 +40,9 @@ class AuthController extends Controller
                 Application::$APP->session->setFlash('success', 'Thanks for registering');
                 return new RedirectResponse('/',301);
             }
-            return  new Responsesymfony($this->render('register', ['model' => $user]));
+            return $this->render('register', ['model' => $user]);
         }
-        return  new Responsesymfony($this->render('register', ['model' => new User()]));
+        return $this->render('register', ['model' => new User()]);
     }
     public function logout(Requestsymfony $request)
     {
@@ -51,6 +51,6 @@ class AuthController extends Controller
     }
     public function profile()
     {
-        return  new Responsesymfony($this->render('profile'));
+        return  $this->render('profile');
     }
 }
